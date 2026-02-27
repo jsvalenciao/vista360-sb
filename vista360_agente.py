@@ -4,9 +4,10 @@ from datetime import datetime
 import json
 
 # ─── CONFIGURACIÓN ────────────────────────────────────────────
-MONGODB_URI = "mongodb+srv://admin:Vista360SB2025@vista360.ey3oqip.mongodb.net/?appName=vista360"
-DATABASE_NAME = "vista360"
-GEMINI_API_KEY = "AIzaSyCCNL7ossDJ-hXIR4wB4thedEk2xP4jukQ"
+import os
+MONGODB_URI = os.environ.get("MONGODB_URI", "")
+DATABASE_NAME = os.environ.get("DATABASE_NAME", "vista360")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 genai.configure(api_key=GEMINI_API_KEY)
 modelo = genai.GenerativeModel("gemini-2.0-flash")
@@ -152,4 +153,5 @@ if __name__ == "__main__":
         print("─" * 50)
         print(f"Cliente: {resultados[0]['nombre']}")
         print(f"Fuentes: {', '.join(resultados[0]['fuentes'])}")
+
         print(f"\nAnálisis:\n{resultados[0]['analisis']}")
