@@ -1,10 +1,8 @@
 import streamlit as st
 from pymongo import MongoClient
-from datetime import datetime
 import pandas as pd
 
 # ─── CONFIGURACIÓN ────────────────────────────────────────────
-import streamlit as st
 MONGODB_URI = st.secrets["MONGODB_URI"]
 DATABASE_NAME = st.secrets["DATABASE_NAME"]
 
@@ -48,29 +46,6 @@ st.markdown("""
         color: white;
         margin-bottom: 20px;
     }
-    .metric-card {
-        background: #f8f9fa;
-        border-left: 4px solid #00A859;
-        padding: 15px;
-        border-radius: 8px;
-        margin: 5px 0;
-    }
-    .alert-alta {
-        background: #fff3cd;
-        border-left: 4px solid #FDB71A;
-        padding: 10px 15px;
-        border-radius: 6px;
-        margin: 5px 0;
-    }
-    .fuente-badge {
-        display: inline-block;
-        background: #00A859;
-        color: white;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 12px;
-        margin: 2px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -86,7 +61,7 @@ st.markdown("""
 clientes = cargar_clientes()
 
 if not clientes:
-    st.error("No se encontraron clientes en la colección vista360. Ejecuta primero el agente en Colab.")
+    st.error("No se encontraron clientes en la colección vista360.")
     st.stop()
 
 # ─── MÉTRICAS GENERALES ───────────────────────────────────────
@@ -115,8 +90,7 @@ col_lista, col_detalle = st.columns([1, 2])
 # ─── LISTA DE CLIENTES ────────────────────────────────────────
 with col_lista:
     st.markdown("### 👥 Clientes")
-
-    busqueda = st.text_input("🔍 Buscar por nombre o cédula", placeholder="Ej: Eduardo o 12345678")
+    busqueda = st.text_input("🔍 Buscar por nombre o cédula", placeholder="Ej: Eduardo")
 
     clientes_filtrados = clientes
     if busqueda:
@@ -128,13 +102,12 @@ with col_lista:
         ]
 
     if not clientes_filtrados:
-        st.warning("No se encontraron clientes con ese criterio.")
+        st.warning("No se encontraron clientes.")
     else:
         for c in clientes_filtrados:
             fuentes = c.get("fuentes", [])
             num_fuentes = len(fuentes)
             emoji = "🟢" if num_fuentes == 3 else "🟡" if num_fuentes == 2 else "🔵"
-
             if st.button(
                 f"{emoji} {c.get('nombre', 'Sin nombre')} — {c.get('ciudad', '')}",
                 key=c["cedula"],
@@ -156,9 +129,7 @@ with col_detalle:
         perfil = c.get("perfil_completo", {})
         fuentes = c.get("fuentes", [])
 
-        # Nombre y datos básicos
         st.markdown(f"### 👤 {c.get('nombre', 'Sin nombre')}")
-
         col_a, col_b, col_c = st.columns(3)
         with col_a:
             st.markdown(f"**📍 Ciudad:** {c.get('ciudad', 'N/A')}")
@@ -170,7 +141,6 @@ with col_detalle:
 
         st.markdown("---")
 
-        # Tabs de información
         tab1, tab2, tab3, tab4 = st.tabs([
             "🤖 Análisis IA",
             "📋 CENTRA",
@@ -180,8 +150,7 @@ with col_detalle:
 
         with tab1:
             st.markdown("#### 🤖 Análisis Gemini — Recomendaciones para el Asesor")
-            analisis = c.get("analisis", "Sin análisis disponible")
-            st.markdown(analisis)
+            st.markdown(c.get("analisis", "Sin análisis disponible"))
 
         with tab2:
             datos_centra = perfil.get("datos_centra")
@@ -224,7 +193,7 @@ with col_detalle:
                 for i, lead in enumerate(datos_leads):
                     prob = lead.get("probabilidad_cierre", 0)
                     color = "🟢" if prob >= 70 else "🟡" if prob >= 40 else "🔴"
-                    with st.expander(f"Lead {i+1}: {lead.get('producto_interes', 'N/A')} — {color} {prob}% probabilidad"):
+                    with st.expander(f"Lead {i+1}: {lead.get('producto_interes', 'N/A')} — {color} {prob}%"):
                         col1, col2 = st.columns(2)
                         with col1:
                             st.markdown(f"**Estado:** {lead.get('estado_lead', 'N/A')}")
@@ -235,5 +204,4 @@ with col_detalle:
                             st.markdown(f"**Último seguimiento:** {lead.get('fecha_ultimo_seguimiento', 'N/A')}")
                         st.markdown(f"**Observaciones:** {lead.get('observaciones', 'N/A')}")
             else:
-
                 st.info("Este cliente no tiene leads en Gestor de Leads.")
