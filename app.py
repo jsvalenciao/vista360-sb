@@ -4,8 +4,9 @@ from datetime import datetime
 import pandas as pd
 
 # ─── CONFIGURACIÓN ────────────────────────────────────────────
-MONGODB_URI = "mongodb+srv://admin:Vista360SB2025@vista360.ey3oqip.mongodb.net/?appName=vista360"
-DATABASE_NAME = "vista360"
+import streamlit as st
+MONGODB_URI = st.secrets["MONGODB_URI"]
+DATABASE_NAME = st.secrets["DATABASE_NAME"]
 
 # ─── CONEXIÓN MONGODB ─────────────────────────────────────────
 @st.cache_resource
@@ -234,4 +235,5 @@ with col_detalle:
                             st.markdown(f"**Último seguimiento:** {lead.get('fecha_ultimo_seguimiento', 'N/A')}")
                         st.markdown(f"**Observaciones:** {lead.get('observaciones', 'N/A')}")
             else:
+
                 st.info("Este cliente no tiene leads en Gestor de Leads.")
